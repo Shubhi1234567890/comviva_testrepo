@@ -18,7 +18,9 @@ public class EmployeeManagementSystem {
             System.out.println("1. Add employee");
             System.out.println("2. Display all employees");
             System.out.println("3. Search employee by ID");
-            System.out.println("4. Exit");
+            System.out.println("4. Update employee details");
+            System.out.println("5. Delete employee");
+            System.out.println("6. Exit");
             System.out.print("Choose an option: ");
 
             switch (INPUT.nextLine().trim()) {
@@ -32,11 +34,17 @@ public class EmployeeManagementSystem {
                     searchEmployee();
                     break;
                 case "4":
+                    updateEmployee();
+                    break;
+                case "5":
+                    deleteEmployee();
+                    break;
+                case "6":
                     running = false;
                     System.out.println("Goodbye!");
                     break;
                 default:
-                    System.out.println("Invalid option. Please choose 1, 2, 3, or 4.");
+                    System.out.println("Invalid option. Please choose 1, 2, 3, 4, 5, or 6.");
             }
         }
     }
@@ -68,16 +76,8 @@ public class EmployeeManagementSystem {
         }
 
         System.out.print("Salary: ");
-        String salaryText = INPUT.nextLine().trim();
-        final double salary;
-        try {
-            salary = Double.parseDouble(salaryText);
-        } catch (NumberFormatException exception) {
-            System.out.println("Please enter a valid numeric salary.");
-            return;
-        }
-        if (!Double.isFinite(salary) || salary < 0) {
-            System.out.println("Salary must be a non-negative number.");
+        Double salary = readSalary(INPUT.nextLine());
+        if (salary == null) {
             return;
         }
 
@@ -106,6 +106,66 @@ public class EmployeeManagementSystem {
         } else {
             printEmployee(employee);
         }
+    }
+
+    private static void updateEmployee() {
+        System.out.print("Enter employee ID to update: ");
+        String id = INPUT.nextLine().trim();
+        Employee employee = EMPLOYEES.get(id);
+        if (employee == null) {
+            System.out.println("No employee found with ID " + id + ".");
+            return;
+        }
+
+        System.out.println("Press Enter to keep the current value.");
+
+        System.out.print("Name [" + employee.name + "]: ");
+        String nameInput = INPUT.nextLine().trim();
+        String name = nameInput.isEmpty() ? employee.name : nameInput;
+
+        System.out.print("Department [" + employee.department + "]: ");
+        String departmentInput = INPUT.nextLine().trim();
+        String department = departmentInput.isEmpty() ? employee.department : departmentInput;
+
+        System.out.print("Salary [" + employee.salary + "]: ");
+        String salaryInput = INPUT.nextLine().trim();
+        double salary = employee.salary;
+        if (!salaryInput.isEmpty()) {
+            Double updatedSalary = readSalary(salaryInput);
+            if (updatedSalary == null) {
+                return;
+            }
+            salary = updatedSalary;
+        }
+
+        EMPLOYEES.put(id, new Employee(id, name, department, salary));
+        System.out.println("Employee details updated successfully.");
+    }
+
+    private static void deleteEmployee() {
+        System.out.print("Enter employee ID to delete: ");
+        String id = INPUT.nextLine().trim();
+        Employee removed = EMPLOYEES.remove(id);
+        if (removed == null) {
+            System.out.println("No employee found with ID " + id + ".");
+        } else {
+            System.out.println("Employee deleted successfully.");
+        }
+    }
+
+    private static Double readSalary(String salaryText) {
+        final double salary;
+        try {
+            salary = Double.parseDouble(salaryText.trim());
+        } catch (NumberFormatException exception) {
+            System.out.println("Please enter a valid numeric salary.");
+            return null;
+        }
+        if (!Double.isFinite(salary) || salary < 0) {
+            System.out.println("Salary must be a non-negative number.");
+            return null;
+        }
+        return salary;
     }
 
     private static void printEmployee(Employee employee) {
